@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>2026 關西家族之旅 - 旗艦導遊終極版 V15.1</title>
+    <!-- 桌面圖示：紅鳥居 -->
+    <link rel="apple-touch-icon" href="https://i.ibb.co/27KXyfSt/image.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700;900&family=Ma+Shan+Zheng&display=swap');
+        
+        :root {
+            --kyoto-red: #B22D15;
+            --bamboo-green: #3A4D39;
+            --osaka-gold: #D4AF37;
+            --washi-bg: #F9F6F0;
+            --stay-dark: #1A1A1A;
+            --premium-navy: #1E272E;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--washi-bg);
+            color: #2D3436;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+            text-align: left;
+        }
+
+        .calligraphy { font-family: 'Ma Shan Zheng', cursive !important; }
+        .kaity { font-family: 'DFKai-SB', '標楷體', 'Kaiti TC', 'KaiTi', serif !important; }
+
+        .tab-active {
+            background: var(--kyoto-red) !important;
+            color: white !important;
+            box-shadow: 0 8px 20px rgba(178, 45, 21, 0.35);
+            transform: scale(1.08);
+        }
+
+        .glass-tool {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .animate-slideUp { animation: slideUp 0.3s cubic-bezier(0, 0, 0.2, 1) forwards; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+        .modal-immersive-header {
+            height: 280px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .modal-immersive-overlay {
+            background: linear-gradient(to bottom, rgba(249, 246, 240, 0.1) 0%, rgba(249, 246, 240, 0.9) 100%);
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+        }
+
+        .card-stay {
+            background-color: var(--stay-dark) !important;
+            color: #FFFFFF !important;
+            border-left: 6px solid var(--osaka-gold) !important;
+        }
+
+        .map-interactive-container {
+            width: 100%;
+            height: 400px;
+            background: #eee;
+            border-radius: 2rem;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #fff;
+            touch-action: none;
+            cursor: grab;
+        }
+
+        #zoomable-map {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transform-origin: center center;
+            will-change: transform;
+            transition: transform 0.1s ease-out;
+        }
+
+        .btn-press:active { transform: scale(0.92); opacity: 0.8; }
+        #stamina-ring { transition: stroke-dashoffset 1.2s ease-out; }
+
+        iframe {
+            border: none;
+            width: 100%;
+            height: 480px;
+            border-radius: 1.5rem;
+        }
+    </style>
+</head>
+<body class="max-w-md mx-auto shadow-2xl min-h-screen pb-48 relative text-left">
+
+    <!-- Header Section -->
+    <header id="main-header" class="bg-[#3A4D39] text-white p-8 rounded-b-[4rem] shadow-2xl relative overflow-hidden min-h-[220px] flex flex-col justify-end transition-all text-left">
+        <img id="header-bg" src="https://images.unsplash.com/photo-1590559899731-a382839e5549?auto=format&fit=crop&w=1200&q=80" class="absolute inset-0 w-full h-full object-cover opacity-45 transition-all duration-700">
+        <div class="absolute inset-0 bg-gradient-to-t from-[#3A4D39] via-transparent to-transparent opacity-80"></div>
+        <div class="relative z-10 flex justify-between items-end">
+            <div class="flex-1 overflow-hidden pb-1 text-left">
+                <h1 class="text-4xl font-black kaity text-gray-900 leading-none mb-1" style="text-shadow: 0 0 15px white;">關西小醉醉</h1>
+                <p class="text-xs font-bold text-yellow-100/80 tracking-widest uppercase">Family Luxury Tour 2026</p>
+            </div>
+            <div class="text-right flex flex-col items-end">
+                <p id="weather-city-name" class="text-7xl calligraphy text-yellow-50 leading-none mb-1 drop-shadow-md">大阪</p>
+                <div class="flex items-center justify-end gap-2 pr-1 text-left">
+                    <p id="weather-temp-calligraphy" class="text-4xl calligraphy text-yellow-100 leading-none text-left">12°C</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toolbar -->
+    <section class="px-4 -mt-10 relative z-20 flex justify-center gap-2 text-center text-left">
+        <button onclick="window.toggleTool('calc')" class="w-[23%] glass-tool p-4 rounded-[2rem] shadow-xl flex flex-col items-center btn-press"><i class="fas fa-calculator text-[--osaka-gold] mb-1.5 text-xl"></i><span class="text-[9px] font-black text-gray-800">匯率</span></button>
+        <button onclick="window.toggleTool('ledger')" class="w-[23%] glass-tool p-4 rounded-[2rem] shadow-xl flex flex-col items-center btn-press"><i class="fas fa-coins text-emerald-600 mb-1.5 text-xl text-left"></i><span class="text-[9px] font-black text-gray-800 text-left">記帳</span></button>
+        <button onclick="window.toggleTool('trans')" class="w-[23%] glass-tool p-4 rounded-[2rem] shadow-xl flex flex-col items-center btn-press"><i class="fas fa-language text-blue-500 mb-1.5 text-xl text-left"></i><span class="text-[9px] font-black text-gray-800 text-left text-left">翻譯</span></button>
+        <button onclick="window.toggleTool('checklist')" class="w-[23%] glass-tool p-4 rounded-[2rem] shadow-xl flex flex-col items-center btn-press text-left text-left"><i class="fas fa-clipboard-list text-purple-500 mb-1.5 text-xl"></i><span class="text-[9px] font-black text-gray-800 text-left tracking-tighter">清單</span></button>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="flex overflow-x-auto whitespace-nowrap px-4 py-8 no-scrollbar sticky top-0 z-40 bg-[--washi-bg]/95 backdrop-blur-md text-left">
+        <div class="flex space-x-4 mx-auto px-4 text-left text-left" id="day-nav-container"></div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="px-6 min-h-[400px] text-left"></main>
+
+    <!-- Modal Container -->
+    <div id="tool-modal" class="hidden fixed inset-0 z-[150] flex items-end justify-center bg-black/60 backdrop-blur-md text-left text-left" onclick="if(event.target === this) window.closeModal()">
+        <div class="bg-[--washi-bg] w-full max-w-md rounded-t-[3rem] shadow-2xl overflow-hidden animate-slideUp max-h-[92vh] flex flex-col relative text-left">
+            <div class="w-12 h-1 bg-gray-300 rounded-full mx-auto mt-4 mb-2 text-left"></div>
+            <button onclick="window.closeModal()" class="absolute top-6 right-6 z-[999] w-12 h-12 rounded-full bg-black/20 text-white flex items-center justify-center active:scale-90 shadow-lg backdrop-blur-md border border-white/20 text-left">
+                <i class="fas fa-times text-xl text-left text-left text-left"></i>
+            </button>
+            <div id="modal-body" class="flex-1 overflow-y-auto no-scrollbar pb-10 text-left"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-sm bg-white/95 backdrop-blur-3xl rounded-[2.5rem] shadow-2xl border border-white p-5 z-50 flex justify-between items-center px-10 safe-pb text-left">
+        <a href="https://line.me/ti/g/XqQfYryaUK" target="_blank" class="flex flex-col items-center">
+            <div class="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center mb-1 shadow-sm text-center text-left text-left"><i class="fab fa-line text-2xl text-left"></i></div>
+            <span class="text-[8px] font-black text-gray-500 uppercase tracking-tighter text-center">聯繫司機</span>
+        </a>
+        <div class="text-center relative -top-2">
+            <div class="relative w-16 h-16 mx-auto text-center text-left">
+                <svg class="w-full h-full transform -rotate-90">
+                    <circle cx="32" cy="32" r="28" stroke="#f0f0f0" stroke-width="4" fill="transparent" />
+                    <circle id="stamina-ring" cx="32" cy="32" r="28" stroke="var(--kyoto-red)" stroke-width="4" fill="transparent" stroke-dasharray="176" stroke-dashoffset="176" />
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center font-black text-[--kyoto-red] text-sm text-center text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><span id="stamina-val">--%</span></div>
+            </div>
+            <span class="text-[8px] font-black text-gray-400 uppercase tracking-widest text-center">家族體力</span>
+        </div>
+        <button onclick="window.toggleTool('trans')" class="flex flex-col items-center text-center">
+            <div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-1 shadow-sm font-black text-center text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">AI 助手</div>
+            <span class="text-[8px] font-black text-gray-500 uppercase tracking-tighter text-center text-left text-left text-left">AI 助手</span>
+        </button>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, addDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const apiKey = ""; 
+
+        const mimaruIntro = `專為家族旅行與長輩設計的高質感公寓飯店。房內不只是睡覺的空間，更擁有「家庭中心」概念的大型木質餐桌，讓全家人在結束繁忙行程後，能圍聚在此分享臨空城買回來的戰利品。配置全套廚房設備與大冰箱，非常適合在飯店旁的 Life 超市採買當季草莓與甜點後，回房開啟家庭宵夜派對。地址：〒542-0081 大阪府中央區南船場2-4-18。`;
+        const mimaruGuide = `【首席導遊點評】飯店旁即是「Life」大型超市，步行 5 分鐘即抵心齋橋。電話：+81 6-4352-8220`;
+        const piecesIntro = `以「旅途中的拼圖」為名，這間京都美學飯店客房坪數遠超一般日本市區飯店，全房型配置精品「Balmuda」家電，營造質感生活。擁有寬敞的起居空間，讓長輩在飯店內也能徹底放鬆。飯店鄰近京都車站「八條口」，是搭乘機場巴士直達航廈的最佳戰略點。地址：〒601-8003 京都府南區東九條室町 9-4。`;
+        const piecesGuide = `【首席導遊點評】鄰近八條口巴士站，是回程往機場的最優解。電話：+81 6-2361-9041`;
+
+        let exchangeRate = 0.211;
+
+        const tourData = {
+            1: { 
+                label: "第一日", loc: "大阪", engLoc: "Osaka", img: "https://images.unsplash.com/photo-1590559899731-a382839e5549?auto=format&fit=crop&w=1200&q=80", stamina: 80, temp: "12°C",
+                events: [
+                    { t: "09:20", s: "桃園機場 | 星宇 JX822", type: "交通", i: "plane-departure", n: "第一航廈精品航空啟程。", m: "Taoyuan+Airport", imgDetail: "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?auto=format&fit=crop&w=800", detailTitle: "星宇航向關西", intro: `建議 06:50 抵達「第一航廈」辦理手續。星宇 JX822 提供最新機型與精品服務。龍騰卡卡友可前往 T1 休息室。特別推薦龍騰餐兌換：<strong>「畢卓樂地 Bistro-D」</strong>(靠近 B5 登機口)，享用精品級餐食為旅途熱身。` },
+                    { t: "12:50", s: "抵達關西機場 | KIX", type: "交通", i: "plane-arrival", n: "第一航廈通關入境。", m: "KIX", detailTitle: "抵達關西", intro: `由關西機場「第一航廈」入境通關。完成通關領取行李後，您可以選擇前往臨空城或直接搭車至飯店。` },
+                    { t: "15:00", s: "臨空城 Outlet (Rinku Town)", type: "購物", i: "shopping-cart", n: "補貨首站，享受輕鬆採買。", m: "Rinku+Premium+Outlets", imgDetail: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800", detailTitle: "臨空城攻略", intro: `擁有超過 200 家品牌。路面平坦對長輩友善。`, aiGuide: `導遊建議：下機首站補貨最順路，建議先到服務中心領取外國遊客優惠券。` },
+                    { t: "19:00", s: "飯店入住 | 心齋橋 NORTH", type: "住宿", i: "hotel", n: "入住 MIMARU 大阪心齋橋 NORTH。", m: "MIMARU+Osaka+Shinsaibashi+North", imgDetail: "https://i.ibb.co/Wv8V9WDM/image.jpg", detailTitle: "大阪奢華寓所", intro: mimaruIntro, aiGuide: mimaruGuide, reserved: true },
+                    { t: "21:00", s: "🍓 宵夜掃貨與草莓攻略", type: "購物", i: "shopping-bag", n: "超市採買，享受家庭客廳時光。", m: "Life+Supermarket", detailTitle: "大阪宵夜清單", intro: `前往 Life 超市採買古都華、淡雪等名產草莓。全家聚在客廳享用甜點，是最棒的開場。` }
+                ] 
+            },
+            2: { 
+                label: "第二日", loc: "大阪", engLoc: "Osaka", img: "https://i.ibb.co/4w15qLm4/image.jpg", stamina: 40, temp: "11°C",
+                events: [
+                    { t: "08:00", s: "VIP 專屬入口報到", type: "體驗", i: "crown", n: "專屬休息室，尊榮啟程。", m: "USJ+VIP+Entrance", imgDetail: "https://images.unsplash.com/photo-1590233461421-47701389772d?auto=format&fit=crop&w=800", detailTitle: "VIP 專屬報到", intro: `建議在「飯店接送區」下車。入園後直入豪華休息室，領取 VIP 專屬頸鍊，在啟程前先享用專業咖啡與飲品。`, reserved: true, aiGuide: `首席導遊：這裡備有全區地圖與專人諮詢服務。` },
+                    { t: "09:30", s: "VIP 3小時導覽 (制霸任天堂)", type: "景點", i: "star", n: "專屬導遊領隊，任天堂區攻略。", m: "Super+Nintendo+World", imgDetail: "https://images.unsplash.com/photo-1624316812891-b3b3a6230919?auto=format&fit=crop&w=1200", detailTitle: "制霸任天堂區域", intro: `由導遊帶領直入<strong>「超級任天堂世界™」</strong>。<br>• <strong>瑪利歐賽車～庫巴的挑戰書～</strong>：驚人的 AR 特效。<br>• <strong>耀西冒險</strong>：全家必坐，拍攝園區全景的最佳位點。<br>• <strong>咚奇剛的瘋狂礦車</strong>：最新斷軌雲霄飛車體驗。<br>• <strong>美食與商店</strong>：奇諾比奧咖啡店、耀西小吃島。`, aiGuide: `導遊建議：耀西冒險視角最廣，是拍攝全家大合照的黃金位點。`, mapImg: "https://www.usj.co.jp/tridiondata/usj/zh/tw/files/img/common/park-map/map-nintendo.png", accessible: true },
+                    { t: "13:00", s: "SAIDO 彩道：日式定食", type: "美食", i: "utensils", n: "長輩最愛定食，享折扣福利。", m: "SAIDO+USJ", imgDetail: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800", detailTitle: "彩道料理", reserved: true, intro: `位於紐約區，環境優雅。提供日式定食，口味清爽適合長輩。全員可使用 1500円餐券並享 10% VIP 折扣。`, aiGuide: `導遊觀點：相比西式漢堡，定食熟食更能幫助恢復體力。` },
+                    { 
+                        t: "16:30", s: "4張快通 & 城堡點燈", type: "體驗", i: "ticket-alt", n: "柯南4D、哈利波特攻略。", m: "Harry+Potter+USJ", 
+                        detailTitle: "VIP 快通攻略與點燈", imgDetail: "https://images.unsplash.com/photo-1590233461421-47701389772d?auto=format&fit=crop&w=800",
+                        intro: `<strong>VIP 附屬 4 張快速通行證建議分配：</strong><br><br>• <strong>名偵探柯南 4D 現場秀 (強力推薦！)</strong>：這是有劇院座椅的特效秀，長輩可以坐在寬敞舒適的椅子上休息，觀賞大場面表演。是下午體力恢復的黃金「休息站」。<br>• <strong>哈利波特禁忌之旅</strong>：若長輩怕暈，可帶他們走專屬通道看城堡內裝與會動的肖像畫即可。<br>• <strong>鷹頭馬身獸的飛行</strong>：較溫和的小型雲霄飛車，適合全家。<br>• <strong>小小兵瘋狂之旅</strong>：視覺效果逗趣。<br><br><strong>城堡點燈：</strong>傍晚時分，哈利波特城堡會亮起璀璨點燈，搭配活米村的燈光與積雪裝飾，非常有魔幻氛圍。`, 
+                        aiGuide: `導遊提醒：柯南 4 點是體力的黃金「雙腿休息站」。點燈後的城堡更有魔法氛圍。` 
+                    },
+                    { t: "17:00", s: "晚間漫步與芬尼根酒吧", type: "體驗", i: "shopping-bag", n: "夜景與輕鬆聚餐。", m: "USJ+Finnegans", detailTitle: "USJ 之夜漫步", intro: `<strong>建議餐廳：芬尼根酒吧餐廳 (Finnegan's Bar & Grill)</strong><br>位於紐約區。料理：炸魚薯條、牛排。擁有舒適沙發卡座。傍晚園區燈光亮起後，哈利波特區與好萊塢區拍照最有氣氛。`, aiGuide: `首席導遊：芬尼根的炸魚薯條很有名，環境非常適合家族悠閒聚餐。` },
+                    { t: "21:00", s: "飯店休息 | MIMARU 大阪", type: "住宿", i: "hotel", n: "回飯店放鬆享受。", m: "MIMARU+Osaka+Shinsaibashi+North", imgDetail: "https://i.ibb.co/Wv8V9WDM/image.jpg", detailTitle: "影城日完美結束", intro: mimaruIntro, aiGuide: mimaruGuide, reserved: true }
+                ] 
+            },
+            3: { 
+                label: "第三日", loc: "奈良", engLoc: "Nara", img: "https://i.ibb.co/Rp5Zt2vJ/image.jpg", stamina: 70, temp: "10°C",
+                events: [
+                    { t: "09:30", s: "OSA COFFEE", type: "美食", i: "coffee", n: "中崎町精品咖啡，必吃布丁。", m: "3+Chome-3-10+Nakazaki,+Kita+Ward,+Osaka", detailTitle: "中崎町文青咖啡", intro: `位於中崎町的高人氣咖啡店。主打經典美式與綿密拿鐵。<strong>必點冰淇淋布丁</strong>：口感Q彈滑順。`, aiGuide: `導遊點評：絕對值得買一杯外帶上車開啟美好的奈良之旅。` },
+                    { 
+                        t: "10:30", s: "奈良公園 / 東大寺", type: "景點", i: "hippo", n: "餵鹿與參拜大佛。", m: "Todaiji", 
+                        imgDetail: "https://i.ibb.co/ksgDLctq/image.jpg", detailTitle: "東大寺參拜與神鹿", 
+                        intro: `奈良公園地形平坦，東大寺設有無障礙坡道，對長輩非常友善。<br><br>• <strong>東大寺大佛殿：</strong> 全球最大的木造建築之一，高達 15 公尺的大佛震撼力十足。<br>• <strong>餵鹿體驗：</strong> 公園內有成群的小鹿。提醒家人：鹿仙貝買完後請立刻收好，慢慢拿出來，避免被圍攻。<br>• <strong>南大門：</strong> 擁有巨大金剛力士像的古老木造大門。`, 
+                        aiGuide: `資深導遊：【停車指令】請司機停在「南大門」最近處專位放人，減少長輩步行路徑。`, accessible: true 
+                    },
+                    { t: "13:00", s: "志津香 - 大宮店", type: "美食", i: "utensils", n: "奈良七種釜飯，三種吃法。", m: "4+Chome-249-4+Omiyacho,+Nara", detailTitle: "奈良釜飯名店：志津香", intro: `奈良最著名釜飯店。必點「奈良七種釜飯」。<br><br><strong>導遊傳授三種吃法：</strong><br>1. 第一碗先品嚐食材原味與香Q米飯。<br>2. 第二碗加入中間軟Q的米飯與配料拌食。<br>3. 第三碗享用鍋底酥脆金黃的「鍋巴」。`, aiGuide: `導遊觀點：大宮店排隊環境較佳且距離大路近，司機接送最順。` },
+                    { t: "14:30", s: "中谷堂搗麻糬 / 三條通散步", type: "體驗", i: "walking", n: "搗麻糬秀與名店巡禮。", m: "Nakatanidou+Nara", detailTitle: "三條通美食巡禮", intro: `漫步三條通老街：• <strong>中谷堂</strong>：現場觀賞極速搗麻糬秀。• <strong>大佛草莓</strong>：巨大的草莓大福。• <strong>弁才天</strong>：精品水果大福斷面極美。• <strong>good knight ice</strong>：華麗系聖代。` },
+                    { 
+                        t: "16:20", s: "宇治 平等院 & 抹茶時光", type: "景點", i: "leaf", n: "抹茶四大名店深度巡禮。", m: "Byodoin", 
+                        imgDetail: "https://i.ibb.co/vx1ptgT0/image.jpg", detailTitle: "宇治抹茶香", 
+                        intro: `欣賞平等院後進入抹茶天堂：<br><br>
+                        1. <strong>伊藤久右衛門</strong>：數百年歷史，抹茶聖代層次豐富，伴手禮種類最齊全。<br>
+                        2. <strong>中村藤吉</strong>：招牌「竹筒聖代」與抹茶凍是必吃首選。<br>
+                        3. <strong>福壽園宇治工房</strong>：提供正統茶道體驗，氛圍靜謐。<br>
+                        4. <strong>Matcha Republic 抹茶共和國</strong>：超夯的「可以喝的墨水」抹茶拿鐵。` 
+                    },
+                    { t: "18:30", s: "飯店入住 | 京都 22 Pieces", type: "住宿", i: "hotel", n: "入住京都車站旁美學名邸。", m: "22+pieces+Kyoto", imgDetail: "https://i.ibb.co/svMxj7z5/image.jpg", detailTitle: "京都奢華泊：22 pieces", intro: piecesIntro, aiGuide: piecesGuide, reserved: true }
+                ] 
+            },
+            4: { 
+                label: "第四日", loc: "京都", engLoc: "Kyoto", img: "https://i.ibb.co/PzY0SDLD/image.jpg", stamina: 65, temp: "13°C",
+                events: [
+                    { 
+                        t: "09:30", s: "金閣寺參拜", type: "景點", i: "sun", n: "閃耀舍利殿。感悟禪味。", m: "Kinkakuji", 
+                        detailTitle: "鹿苑寺・金閣", imgDetail: "https://i.ibb.co/nN541XSx/image.jpg",
+                        intro: `<strong>【京都明信片上的黃金傳說】</strong><br>建築外牆覆蓋純金箔，在「鏡湖池」形成完美的黃金倒影。三層建築分別融合了貴族、武家與禪宗風格，頂端飾有金色鳳凰。`, 
+                        aiGuide: `資深導遊：【停車指令】請司機停在最靠近入口處。第一個攝影點即是全家合照首選。` 
+                    },
+                    {
+                        t: "10:45", s: "ABOUT US COFFEE", type: "美食", i: "coffee", n: "時尚主理人的精品咖啡。", m: "ABOUT+US+COFFEE+FUSHIMI+INARI",
+                        detailTitle: "主理人的咖啡美學", imgDetail: "https://images.unsplash.com/photo-1559925393-8be0ec41b505?auto=format&fit=crop&w=800",
+                        intro: `主理人澤野井泰成先生將精品業審美融入咖啡。店內極具質感，是參拜前後享受精品時光的最佳中繼站。`
+                    },
+                    { 
+                        t: "11:00", s: "伏見稻荷大社", type: "景點", i: "torii-gate", n: "千本鳥居。祈求平安。", m: "Fushimi", 
+                        detailTitle: "稻荷大社・千本鳥居", imgDetail: "https://images.unsplash.com/photo-1478436127897-769e1b3f0f36?auto=format&fit=crop&w=800",
+                        intro: `最具代表性的「千本鳥居」是由信徒捐贈。狐狸是神的使者，叼著象徵神力的鑰匙。<br><br>我們安排只走平地前段，不費體力即可拍出震撼美照。`, 
+                        aiGuide: `資深導遊：【停車戰策】請司機停在最靠近『南大門』處。拍完鳥居即撤。` 
+                    },
+                    { 
+                        t: "14:30", s: "清水寺 & 緩下坡散策", type: "景點", i: "temple", n: "無釘工藝舞台俯瞰京都。", m: "Kiyomizu", 
+                        detailTitle: "音羽山・清水寺", imgDetail: "https://i.ibb.co/8nLR731B/image.jpg",
+                        intro: `著名的「清水舞台」是由 139 根巨大圓木支撐，完全沒使用釘子。「音羽瀑布」三道清泉代表學業、戀愛、長壽。<br><br>回程往「二年坂」方向下坡走最省力。`, 
+                        aiGuide: `資深導遊：【重要指令】司機務必開到『最上方停車場』。我們往下坡走，保護長輩膝蓋！` 
+                    },
+                    { 
+                        t: "16:30", s: "鴨川賞櫻浪漫", type: "景點", i: "walking", n: "櫻花廊道與半木之道漫行。", m: "Gion+Hanami-koji", 
+                        detailTitle: "京都櫻花散策", 
+                        intro: `特別推薦沿著賀茂川邊的<strong>「花之回廊」</strong>與<strong>「半木之道」</strong>漫行，感受枝垂櫻如粉色簾幕般垂入水面，享受極致浪漫。` 
+                    },
+                    { 
+                        t: "18:00", s: "弘 京都站前店 燒肉", type: "美食", i: "utensils", n: "頂級和牛饗宴。京都排隊名店。", m: "Yakiniku+Hiro+Kyoto+Station", 
+                        detailTitle: "京之燒肉處 弘", imgDetail: "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800",
+                        intro: `<strong>【京都必吃頂級燒肉推薦行程】</strong><br><br>
+                        • <strong>和牛生拌牛肉（ユッケ）</strong>：認證生食級部位，油花細緻。<br>
+                        • <strong>厚切牛肉拼盤</strong>：稀少部位以厚切呈現，肉質飽滿。<br>
+                        • <strong>秘製壺漬厚切橫膈膜</strong>：超人氣招牌菜，口味濃郁。<br>
+                        • <strong>和牛赤身搭配蔥醬</strong>：油脂適中，解膩又開胃。<br>
+                        • <strong>薄切特製牛五花</strong>：油脂香氣四溢。`,
+                        reserved: true
+                    },
+                    { t: "20:00", s: "返回飯店休息 | 22 Pieces", type: "住宿", i: "hotel", n: "回京都飯店放鬆享受。", m: "22+pieces+Kyoto", imgDetail: "https://i.ibb.co/svMxj7z5/image.jpg", detailTitle: "京都奢華泊：22 pieces", intro: piecesIntro, aiGuide: piecesGuide, reserved: true }
+                ] 
+            },
+            5: { 
+                label: "第五日", loc: "京都", engLoc: "Kyoto", img: "https://i.ibb.co/JFxL6W1q/image.jpg", stamina: 75, temp: "11°C",
+                events: [
+                    { t: "08:40", s: "計程車直送龜岡車站", type: "交通", i: "taxi", n: "優雅啟程，直達小火車起點。", m: "Torokko+Kameoka", detailTitle: "嵐山啟程策略", intro: `安排計程車直接送往龜岡車站，避開京都車站複雜轉乘，優雅迎接嵐山的清晨。` },
+                    { 
+                        t: "09:30", s: "嵐山小火車 (龜岡→嵐山)", type: "體驗", i: "train", n: "峽谷鐵道視覺饗宴。", m: "Arashiyama+Scenic+Railway", 
+                        detailTitle: "嵯峨野觀光小火車", 
+                        intro: `沿著保津川行駛。穿梭在險峻峽谷間，俯瞰湍急溪流。<br><br><strong>【重要攻略】</strong><br>請務必在<strong>「小火車嵐山站」 (Torokko Arashiyama)</strong> 下車，不要坐到終點站嵯峨站。這站下車後，景點銜接最順，小火車嵐山站出口一出來，就是竹林小徑最漂亮的一段。`, 
+                        aiGuide: `首席導遊：【提醒】請在嵐山站下車，直接進入竹林，不要坐到底！` 
+                    },
+                    { t: "10:30", s: "天龍寺 (北進正出策略)", type: "景點", i: "torii-gate", n: "下坡動線，賞庭園美感。", m: "Tenryu-ji", detailTitle: "靈龜山・天龍寺", intro: `世界文化遺產。曹源池庭園運用「借景」手法。從北門進入，順著地勢緩緩「走下坡」至正門離開。`, aiGuide: `資深導遊：【下坡神策】從北門進、正門出，省力又美。` },
+                    { t: "14:30", s: "竹林之道 & 尊榮人力車", type: "體驗", i: "walking", n: "穿越綠色隧道，職人深度導覽。", m: "Arashiyama+Bamboo", detailTitle: "嵐山之美：竹林", intro: `特別安排惠比壽屋人力車，職人專業導覽視角。` },
+                    { t: "18:00", s: "AEON Mall 購物 & 飯店休息", type: "住宿", i: "hotel", n: "京都最後一晚。", m: "AEON+Mall+Kyoto", imgDetail: "https://i.ibb.co/svMxj7z5/image.jpg", detailTitle: "旅程完美收尾", intro: piecesIntro, aiGuide: piecesGuide, reserved: true }
+                ] 
+            },
+            6: { 
+                label: "第六日", loc: "京都", engLoc: "Kyoto", img: "https://i.ibb.co/ccRs1FZB/image.jpg", stamina: 95, temp: "12°C",
+                events: [
+                    { t: "09:00", s: "Limousine Bus 機場巴士", type: "交通", i: "bus", n: "八條口直送航廈。", m: "Kyoto+Station+Bus", detailTitle: "賦歸路徑", aiGuide: `資深導遊：免搬行李最舒適。` },
+                    { t: "14:00", s: "關西機場起飛 | JX823", type: "交通", i: "plane-departure", n: "平安返台。", m: "KIX" }
+                ] 
+            }
+        };
+
+        window.closeModal = () => document.getElementById('tool-modal').classList.add('hidden');
+
+        window.toggleTool = (type, day, idx) => {
+            const modal = document.getElementById('tool-modal'), body = document.getElementById('modal-body');
+            modal.classList.remove('hidden');
+            body.innerHTML = '<div class="p-20 text-center"><p>資深導遊正在準備內容...</p></div>';
+            
+            setTimeout(() => {
+                if (type === 'calc') {
+                    body.innerHTML = `<div class="p-10 text-left fade-in text-left text-left text-left text-left text-left text-left"><h3 class="text-3xl font-black kaity mb-6 text-left text-left text-left text-left text-left text-left text-left">匯率換算</h3><div class="mb-8 text-left text-left text-left text-left text-left text-left text-left text-left text-left"><label class="text-[11px] font-black text-gray-400 block mb-2 font-mono text-left text-left text-left text-left text-left text-left text-left">日圓 (JPY)</label><input type="number" id="jpy-input" class="w-full text-5xl font-black border-b-4 border-[--osaka-gold] py-4 outline-none bg-transparent text-left" oninput="window.runConversion()" placeholder="¥"></div><div><label class="text-[11px] font-black text-gray-400 block mb-2 font-mono text-left text-left text-left text-left text-left text-left">台幣 (TWD)</label><p id="twd-output" class="text-6xl font-black text-[--kyoto-red] mt-2 text-left text-left text-left text-left text-left">0</p></div></div>`;
+                } else if (type === 'ledger') {
+                    const ledgerUrl = "https://app.lightsplit.com/g/2jGf3BAwhK1jsbnwmPN7BQ";
+                    body.innerHTML = `<div class="p-6 text-left fade-in h-full flex flex-col text-left text-left text-left text-left text-left text-left text-left"><h3 class="text-3xl font-black kaity mb-4">雲端記帳本</h3><iframe src="${ledgerUrl}"></iframe><a href="${ledgerUrl}" target="_blank" class="mt-4 block py-3 bg-emerald-600 text-white text-center rounded-xl font-bold shadow-lg text-left text-left text-left">全螢幕開啟</a></div>`;
+                } else if (type === 'trans') {
+                    const transUrl = "https://translate.google.com/?sl=zh-TW&tl=ja&op=translate";
+                    body.innerHTML = `<div class="p-10 text-left fade-in"><h3 class="text-3xl font-black kaity mb-6 text-left text-left text-left text-left text-left">旅遊翻譯助手</h3>
+                        <div class="space-y-4 mb-8 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><p class="text-xs text-blue-600 font-bold mb-1">常用：我要這個</p><p class="text-lg font-black text-gray-800">これをお願いします</p></div>
+                        <a href="${transUrl}" target="_blank" class="block w-full py-5 bg-blue-600 text-white rounded-[2rem] text-center text-lg font-black kaity shadow-xl btn-press text-left text-left text-left text-left text-left text-left">開啟 Google 翻譯</a>
+                    </div>`;
+                } else if (type === 'checklist') {
+                    const list = ["護照全員", "VIP 憑證", "網卡/Wifi", "日圓現金", "保暖外套", "藥品包"];
+                    body.innerHTML = `<div class="p-10 text-left fade-in text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><h3 class="text-3xl font-black kaity mb-6 text-left text-left text-left text-left text-left">行前清單</h3><div class="space-y-4 text-left text-left text-left text-left text-left text-left text-left text-left">${list.map(text => `<label class="checklist-item flex items-center gap-4 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm text-left"><input type="checkbox" class="w-6 h-6 rounded-lg border-gray-300 text-[--kyoto-red] focus:ring-[--kyoto-red]"><span class="text-sm font-bold text-gray-700">${text}</span></label>`).join('')}</div></div>`;
+                } else if (type === 'detail') {
+                    const d = tourData[day].events[idx];
+                    body.innerHTML = `
+                        <div class="fade-in text-left">
+                            <div class="modal-immersive-header" style="background-image: url('${d.imgDetail || 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800'}')"><div class="modal-immersive-overlay"></div><div class="absolute bottom-8 left-10 right-10 z-10 text-left text-left text-left"><span class="badge-spot text-[10px] px-5 py-2 rounded-full font-black mb-3 inline-block shadow-sm text-left">${d.type}</span><h2 class="text-4xl font-black text-gray-900 kaity text-shadow-premium leading-tight text-left text-left text-left text-left">${d.detailTitle || d.s}</h2></div></div>
+                            <div class="px-10 pb-16 pt-8 space-y-10 text-left text-left text-left text-left text-left text-left">
+                                ${d.mapImg ? `<section class="text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><h4 class="text-2xl font-black kaity border-l-4 border-blue-500 pl-4 mb-4 text-left text-left text-left text-left">互動導覽圖</h4><div class="map-interactive-container"><img id="zoomable-map" src="${d.mapImg}" alt="地圖"></div></section>` : ''}
+                                <section class="text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><h4 class="text-2xl font-black kaity border-l-4 border-[--kyoto-red] pl-4 mb-3 text-left text-left text-left text-left">詳細規劃與介紹</h4><p class="text-[15px] leading-relaxed text-gray-600 font-medium text-left text-left text-left text-left">${d.intro || '詳細內容準備中。'}</p></section>
+                                ${d.aiGuide ? `<section class="bg-white p-7 rounded-[2.5rem] border border-gray-100 shadow-sm text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><h4 class="text-xl font-black kaity text-[--kyoto-red] mb-3 text-left text-left text-left text-left text-left"><i class="fas fa-user-tie mr-2 text-left text-left text-left text-left text-left text-left"></i>資深導遊觀點</h4><p class="text-[14px] font-bold italic text-gray-700 text-left text-left text-left text-left text-left">${d.aiGuide}</p></section>` : ''}
+                                <a href="https://www.google.com/maps/search/?api=1&query=${d.m}" target="_blank" class="block w-full py-5 bg-gray-900 text-white rounded-[2rem] text-center text-lg font-black kaity shadow-xl btn-press text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">開啟 Google 地圖導航</a>
+                            </div>
+                        </div>`;
+                    if(d.mapImg) { setTimeout(() => {
+                        const viewport = document.querySelector('.map-interactive-container');
+                        const mapImg = document.getElementById('zoomable-map');
+                        if(!mapImg || !viewport) return;
+                        let scale = 1, translate = { x: 0, y: 0 };
+                        const updateUI = () => mapImg.style.transform = `translate(${translate.x}px, ${translate.y}px) scale(${scale})`;
+                        viewport.addEventListener('wheel', (e) => { e.preventDefault(); scale = Math.min(Math.max(1, scale + (e.deltaY > 0 ? -0.25 : 0.25)), 5); updateUI(); }, { passive: false });
+                        let isDragging = false, startPos = { x: 0, y: 0 };
+                        viewport.addEventListener('mousedown', (e) => { isDragging = true; startPos = { x: e.clientX - translate.x, y: e.clientY - translate.y }; });
+                        window.addEventListener('mousemove', (e) => { if(!isDragging) return; translate.x = e.clientX - startPos.x; translate.y = e.clientY - startPos.y; updateUI(); });
+                        window.addEventListener('mouseup', () => isDragging = false);
+                        viewport.addEventListener('dblclick', () => { scale = scale > 1.5 ? 1 : 3; translate = {x:0, y:0}; updateUI(); });
+                    }, 100); }
+                }
+            }, 50);
+        };
+
+        window.runConversion = () => {
+            const jpy = document.getElementById('jpy-input')?.value;
+            if (jpy) document.getElementById('twd-output').innerText = (parseFloat(jpy) * exchangeRate).toLocaleString('zh-TW', {maximumFractionDigits: 1});
+        };
+
+        window.switchDay = (d) => {
+            const data = tourData[d]; if (!data) return;
+            document.querySelectorAll('#day-nav-container button').forEach(b => b.classList.remove('tab-active'));
+            document.getElementById(`tab${d}`).classList.add('tab-active');
+            
+            // 更新頂部背景圖、城市名稱與溫度
+            document.getElementById('header-bg').src = data.img;
+            document.getElementById('weather-city-name').innerText = data.loc;
+            document.getElementById('weather-temp-calligraphy').innerText = data.temp || "--°C";
+
+            const ring = document.getElementById('stamina-ring'), dash = 176 - (176 * (data.stamina || 100) / 100);
+            ring.style.strokeDashoffset = dash; document.getElementById('stamina-val').innerText = (data.stamina || 100) + '%';
+            
+            let html = `<div class="fade-in space-y-6 text-left">`;
+            data.events.forEach((e, idx) => {
+                let isStay = e.type === '住宿';
+                let badgeClass = isStay ? 'badge-stay' : (e.type === '美食' || e.type === '體驗' || e.type === '購物' ? 'badge-food' : 'badge-spot');
+                let cardClass = isStay ? 'card-stay shadow-lg' : 'bg-white shadow-sm border border-gray-100';
+                html += `<div class="relative pl-8 mb-8 border-l-2 border-dashed border-gray-200 text-left text-left text-left text-left text-left text-left text-left" onclick="window.toggleTool('detail', ${d}, ${idx})"><div class="absolute -left-2 top-0 w-4 h-4 rounded-full ${isStay ? 'bg-[--osaka-gold]' : 'bg-[--kyoto-red]'} border-4 border-white shadow-md"></div><div class="${cardClass} rounded-[2.5rem] p-7 active:scale-[0.97] transition-all"><div class="flex justify-between items-center mb-4 text-left text-left text-left"><span class="${isStay ? 'bg-amber-600' : 'bg-[--bamboo-green]'} text-white text-[9px] px-3 py-1 rounded-full font-bold shadow-sm">${e.t}</span><div class="flex gap-2 text-left text-left">${e.reserved ? `<span class="bg-amber-100 text-amber-600 text-[8px] font-black px-2 py-1 rounded-lg border border-amber-200">預約</span>` : ''}<span class="${badgeClass} text-[8px] font-black px-2.5 py-1 rounded-lg">${e.type}</span></div></div><h3 class="text-xl font-bold mb-2 kaity flex items-center text-left text-left text-left text-left text-left text-left text-left text-left text-left"><i class="fas fa-${e.i || 'map-marker-alt'} mr-3 ${isStay ? 'text-[--osaka-gold]' : 'text-[--kyoto-red]'} text-lg opacity-80"></i>${e.s}</h3><p class="text-xs font-bold mb-4 line-clamp-1 opacity-80 text-left text-left text-left text-left text-left text-left text-left text-left">${e.n}</p><div class="${isStay ? 'bg-white/10' : 'bg-red-50'} px-4 py-2.5 rounded-2xl text-[10px] font-black border border-white/20 flex items-center justify-between text-left text-left text-left text-left text-left text-left"><span><i class="fas fa-eye mr-2"></i>${isStay ? '查看飯店特色' : '查看詳情攻略'}</span><i class="fas fa-chevron-right text-[8px] opacity-40"></i></div></div></div>`;
+            });
+            document.getElementById('main-content').innerHTML = html + `</div>`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.onload = async () => {
+            const nav = document.getElementById('day-nav-container'), dayNames = ["第一日", "第二日", "第三日", "第四日", "第五日", "第六日"];
+            nav.innerHTML = dayNames.map((n, i) => `<button onclick="window.switchDay(${i+1})" id="tab${i+1}" class="px-8 py-3 rounded-[1.5rem] bg-white text-gray-400 shadow-sm border border-gray-100 font-black transition-all text-xs text-center text-left text-left text-left text-left text-left">${n}</button>`).join('');
+            window.switchDay(1);
+            const rateRes = await fetch('https://open.er-api.com/v6/latest/JPY');
+            if (rateRes.ok) { const rateData = await rateRes.json(); exchangeRate = rateData.rates.TWD; }
+        };
+    </script>
+</body>
+</html>
